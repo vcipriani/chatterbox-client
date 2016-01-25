@@ -1,11 +1,44 @@
 // YOUR CODE HERE:
 var app = {};
 app.init = function() {
+
+  var self = this;
+  $('.submitChat').on('submit', function(event){
+    event.preventDefault();
+    self.sendMessage($('.newMessage').val());
+  });  
+
+  this.getMessages();
+  $('.newMessage').focus();
+};
+
+
+app.sendMessage = function(message, roomName) {
+  roomName = roomName || 'lobby';
+  var msg = {username: 'test',
+            text: message,
+            roomname: roomName};
+
+  $.ajax({url: 'https://api.parse.com/1/classes/chatterbox',
+        type: 'POST',
+        data: JSON.stringify(msg),
+        success: function(){
+          console.log('Success' + msg);
+          $('.newMessage').val('');
+          $('.newMessage').focus();
+          app.getMessages();
+          }
+        });
+};
+
+app.getMessages = function () {
   $.ajax({
     url: 'https://api.parse.com/1/classes/chatterbox',
     type: 'GET',
+    data: 'order=-createdAt',
     success: function(data) {
       var $messages = $('.messages');
+      $messages.html('');
       _.each(data.results, function(messageObject) {
         $messages.append(newMessage(messageObject.text));
       });
@@ -21,6 +54,7 @@ $(document).on('ready', function() {
   app.init();
 });
 
+// Helper functions
 function newMessage(text) {
   var $node = $('<p></p>');
   $node.text(text);
