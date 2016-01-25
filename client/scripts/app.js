@@ -5,15 +5,19 @@ app.init = function() {
   var self = this;
   $('.submitChat').on('submit', function(event){
     event.preventDefault();
-    self.sendMessage($('.newMessage').val());
+    var message = $('.newMessage').val();
+    if(message==='' || message === ' ') {
+      return;
+    }
+    self.send(message);
   });  
 
-  this.getMessages();
+  this.fetch();
   $('.newMessage').focus();
 };
 
 
-app.sendMessage = function(message, roomName) {
+app.send = function(message, roomName) {
   roomName = roomName || 'lobby';
   var msg = {username: 'test',
             text: message,
@@ -26,12 +30,12 @@ app.sendMessage = function(message, roomName) {
           console.log('Success' + msg);
           $('.newMessage').val('');
           $('.newMessage').focus();
-          app.getMessages();
+          app.fetch();
           }
         });
 };
 
-app.getMessages = function () {
+app.fetch = function () {
   $.ajax({
     url: 'https://api.parse.com/1/classes/chatterbox',
     type: 'GET',
