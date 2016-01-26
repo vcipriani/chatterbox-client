@@ -31,9 +31,31 @@ app.init = function() {
     app.currentRoom = app.$roomDropdown.val();
     if (app.currentRoom === '4ad3bf17') {
       app.currentRoom = null;
+    } else if (app.currentRoom === '2a374huhfguw9') {
+      $('.newRoomForm').toggle();
+      $('.submitChat').toggle();
     }
     app.fetch(app.currentRoom);
   });
+
+  // New Room event handler
+  $('.newRoomForm').on('submit', function(event) {
+    var newRoom = $('.new-room-input').val();
+    event.preventDefault();
+    app.currentRoom = newRoom;
+    app.send({
+      username: GetURLParameter('username'),
+      text: 'New room created by ' + GetURLParameter('username'),
+      roomname: (app.currentRoom || 'lobby')
+    });
+    $('.newRoomForm').toggle();
+    $('.submitChat').toggle();
+    $('.newMessage').focus();
+  });
+
+  //Sign on event handler
+  $('.login').on('click', getUserName);
+
   this.fetch(app.currentRoom);
   setInterval(function(){
     app.fetch(app.currentRoom);
@@ -97,7 +119,7 @@ app.fetch = function (roomName) {
 app.populateRoomDropdown = function() {
   app.$roomDropdown.html('');
   app.$roomDropdown.append('<option value="4ad3bf17">Choose a room..</option>');
-  app.$roomDropdown.append('<option value="Create New Room..">Create New Room..</option>');
+  app.$roomDropdown.append('<option value="2a374huhfguw9">Create New Room..</option>');
   app.rooms.forEach(function(item){
     $node = $('<option></option>');
     $node.text(item);
