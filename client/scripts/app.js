@@ -4,6 +4,7 @@ app.server = 'https://api.parse.com/1/classes/chatterbox';
 app.$messages = null;
 app.$roomDropdown = null;
 app.rooms = [];
+app.friends = {};
 app.currentRoom = null;
 app.init = function() {
 
@@ -38,6 +39,13 @@ app.init = function() {
     app.fetch(app.currentRoom);
   });
 
+  // Friends listener
+  $('#chats').on('click', '.username', function(event){
+    app.friends[event.target.dataset.username] = true;
+    app.fetch(app.currentRoom);
+    app.populateFriends();
+  });
+
   // New Room event handler
   $('.newRoomForm').on('submit', function(event) {
     var newRoom = $('.new-room-input').val();
@@ -63,6 +71,15 @@ app.init = function() {
   $('.newMessage').focus();
 };
 
+app.populateFriends = function() {
+  $friendsList = $('.friends-list');
+  $friendsList.html('');
+  _.each(app.friends, function(friend, friendKey) {
+    var $node = $('<li></li>');
+    $node.text(friendKey);
+    $friendsList.append($node);
+  });
+};
 
 app.send = function(messageObj) {
 
@@ -139,9 +156,14 @@ app.addMessage = function(inputObject) {
 
   var $chat = $('<div class="chat"></div>');
 
-  $chat.append($('<p class="username"></p>').text(inputObject.username + ' in ' + inputObject.roomname));
+  $chat.append($('<p class="username" data-username="' + inputObject.username + '"></p>')
+                      .text(inputObject.username + ' in ' + inputObject.roomname));
 
   $chat.append($('<p class="chat"></p>').text(inputObject.text));
+
+  if (inputObject.username in app.friends) {
+    $chat.addClass('friends');
+  }
 
   app.$messages.append($chat);
 };
