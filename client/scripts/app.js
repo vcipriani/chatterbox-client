@@ -2,8 +2,9 @@
 var app = {};
 app.server = 'https://api.parse.com/1/classes/chatterbox';
 app.$messages = null;
+app.$roomDropdown = null;
 app.rooms = [];
-app.currentRoom = 'all';
+app.currentRoom = null;
 app.init = function() {
 
   var self = this;
@@ -18,14 +19,22 @@ app.init = function() {
     self.send({
       username: GetURLParameter('username'),
       text: message,
-      roomname: 'lobby'
+      roomname: app.currentRoom
     });
   });  
-
-  app.$messages = $('#chats');
   
-  this.fetch();
-  setInterval(this.fetch, 10000);
+  app.$messages = $('#chats');
+  app.$roomDropdown = $('.roomSelector');
+
+  //Dropdown event handler
+  app.$roomDropdown.on('change', function(){
+    app.currentRoom = app.$roomDropdown.val();
+    app.fetch(app.currentRoom);
+  });
+  this.fetch(app.currentRoom);
+  setInterval(function(){
+    app.fetch(app.currentRoom);
+  }, 10000);
   $('.newMessage').focus();
 };
 
@@ -39,12 +48,12 @@ app.send = function(messageObj) {
           // console.log('Success' + msg);
           $('.newMessage').val('');
           $('.newMessage').focus();
-          app.fetch();
+          app.fetch(app.currentRoom);
           }
         });
 };
 
-app.fetch = function () {
+app.fetch = function (roomName) {
   $.ajax({
     url: app.server,
     type: 'GET',
@@ -55,7 +64,20 @@ app.fetch = function () {
         if (app.rooms.indexOf(messageObject.roomname) === -1) {
           app.rooms.push(messageObject.roomname);
         }
-        app.addMessage(messageObject);
+
+        if (roomName) {
+          if (roomName === messageObject.roomname) {
+            app.addMessage(messageObject);
+          }
+        } else {
+          app.addMessage(messageObject);
+        }
+
+        // if (roomName && roomName === messageObject.roomname) {
+        //   app.addMessage(messageObject);
+        // } else if (!roomName) {
+
+        // }
       });
 
 
@@ -70,13 +92,13 @@ app.fetch = function () {
 };
 
 app.populateRoomDropdown = function() {
-  $('.roomSelector').html('');
-  $('.roomSelector').append('<option value="all">Choose a room..</option>');
+  app.$roomDropdown.html('');
+  app.$roomDropdown.append('<option value="all">Choose a room..</option>');
   app.rooms.forEach(function(item){
     $node = $('<option></option>');
     $node.text(item);
     $node.val(item);
-    $('.roomSelector').append($node);
+    app.$roomDropdown.append($node);
   });
 };
 
@@ -88,7 +110,7 @@ app.addMessage = function(inputObject) {
 
   var $chat = $('<div class="chat"></div>');
 
-  $chat.append($('<p class="username"></p>').text(inputObject.username));
+  $chat.append($('<p class="username"></p>').text(inputObject.username + ' in ' + inputObject.roomname));
 
   $chat.append($('<p class="chat"></p>').text(inputObject.text));
 
