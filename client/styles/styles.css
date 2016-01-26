@@ -5,7 +5,7 @@ body {
     font-family: arial, sans-serif;
 }
 
-#main, #chats {
+#main, #chats, .roomSelector {
     width: 500px;
     margin: auto;
     text-align: left;

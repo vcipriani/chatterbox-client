@@ -19,7 +19,7 @@ app.init = function() {
     self.send({
       username: GetURLParameter('username'),
       text: message,
-      roomname: app.currentRoom
+      roomname: (app.currentRoom || 'lobby')
     });
   });  
   
@@ -29,6 +29,9 @@ app.init = function() {
   //Dropdown event handler
   app.$roomDropdown.on('change', function(){
     app.currentRoom = app.$roomDropdown.val();
+    if (app.currentRoom === '4ad3bf17') {
+      app.currentRoom = null;
+    }
     app.fetch(app.currentRoom);
   });
   this.fetch(app.currentRoom);
@@ -93,11 +96,15 @@ app.fetch = function (roomName) {
 
 app.populateRoomDropdown = function() {
   app.$roomDropdown.html('');
-  app.$roomDropdown.append('<option value="all">Choose a room..</option>');
+  app.$roomDropdown.append('<option value="4ad3bf17">Choose a room..</option>');
+  app.$roomDropdown.append('<option value="Create New Room..">Create New Room..</option>');
   app.rooms.forEach(function(item){
     $node = $('<option></option>');
     $node.text(item);
     $node.val(item);
+    if(item === app.currentRoom && app.currentRoom) {
+      $node.attr('selected','selected');
+    }
     app.$roomDropdown.append($node);
   });
 };
